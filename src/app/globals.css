@@ -1,26 +1,157 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --brand: #0b1f4d;
+  --success: #10b981;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-poppins);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
+  margin: 0;
   background: var(--background);
+  background-image:
+    radial-gradient(at 10% 0%, rgba(29, 78, 216, 0.12) 0px, transparent 50%),
+    radial-gradient(at 90% 10%, rgba(15, 23, 42, 0.09) 0px, transparent 45%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), Arial, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@keyframes routeArrowPulse {
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateX(6px);
+    opacity: 1;
+  }
+}
+
+@keyframes routeArrowPulseReverse {
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateX(-6px);
+    opacity: 1;
+  }
+}
+
+.route-arrow {
+  animation: routeArrowPulse 1.2s ease-in-out infinite;
+}
+
+.route-arrow-reverse {
+  animation: routeArrowPulseReverse 1.2s ease-in-out infinite;
+}
+
+@keyframes corridorPop {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes corridorGlow {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scaleX(0.35);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+.corridor-stage {
+  display: grid;
+  gap: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  padding: 18px;
+}
+
+.corridor-hub {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: #f8fafc;
+  padding: 8px 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.corridor-list {
+  display: grid;
+  gap: 12px;
+}
+
+.corridor-route {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  animation: corridorPop 420ms ease forwards;
+}
+
+.corridor-line {
+  height: 2px;
+  width: 100%;
+  border-radius: 999px;
+  transform-origin: left center;
+  background: linear-gradient(90deg, rgba(11, 31, 77, 0.15) 0%, rgba(29, 63, 143, 0.95) 60%, rgba(16, 185, 129, 0.7) 100%);
+  animation: corridorGlow 1.8s ease-in-out infinite;
+}
+
+.corridor-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+  padding: 10px 12px;
+}
+
+.corridor-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: #ecfeff;
+  border: 1px solid #c7f1f7;
+  color: #0f766e;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 9px;
 }
