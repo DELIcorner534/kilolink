@@ -1,7 +1,6 @@
 import { TripCard } from "@/components/trip-card";
-import { CountryFlag } from "@/components/country-flag";
 import { EnvWarning } from "@/components/env-warning";
-import { supportedCountries } from "@/lib/data";
+import { supportedCities } from "@/lib/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Trip } from "@/lib/types";
 import Link from "next/link";
@@ -18,7 +17,7 @@ export default async function SearchPage({
       <main className="mx-auto max-w-7xl px-4 py-10 md:py-14">
         <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
           <h1 className="font-display text-3xl font-semibold tracking-tight text-slate-900">Recherche voyageurs</h1>
-          <p className="mt-2 text-slate-600">Filtrez par depart, destination, date, kilos et prix.</p>
+          <p className="mt-2 text-slate-600">Filtrez par ville de depart, ville de destination, date, kilos et prix.</p>
           <div className="mt-6">
             <EnvWarning title="Supabase non configure" />
           </div>
@@ -59,15 +58,14 @@ export default async function SearchPage({
     <main className="mx-auto max-w-7xl px-4 py-10 md:py-14">
       <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
         <h1 className="font-display text-3xl font-semibold tracking-tight text-slate-900">Recherche voyageurs</h1>
-        <p className="mt-2 text-slate-600">Filtrez par depart, destination, date, kilos et prix.</p>
+        <p className="mt-2 text-slate-600">Filtrez par ville de depart, ville de destination, date, kilos et prix.</p>
       <div className="mt-4 flex flex-wrap gap-2">
-        {supportedCountries.map((country) => (
+        {supportedCities.map((city) => (
           <span
-            key={country.name}
+            key={city}
             className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700"
           >
-            <CountryFlag code={country.code} name={country.name} size={16} />
-            {country.name}
+            {city}
           </span>
         ))}
       </div>
@@ -77,10 +75,10 @@ export default async function SearchPage({
           className="rounded-xl border border-slate-200 bg-slate-50 p-3"
           defaultValue={params.origin ?? ""}
         >
-          <option value="">Depart (tous)</option>
-          {supportedCountries.map((country) => (
-            <option key={country.name} value={country.name}>
-              {country.name}
+          <option value="">Ville de depart (toutes)</option>
+          {supportedCities.map((city) => (
+            <option key={city} value={city}>
+              {city}
             </option>
           ))}
         </select>
@@ -89,10 +87,10 @@ export default async function SearchPage({
           className="rounded-xl border border-slate-200 bg-slate-50 p-3"
           defaultValue={params.destination ?? ""}
         >
-          <option value="">Arrivee (toutes)</option>
-          {supportedCountries.map((country) => (
-            <option key={country.name} value={country.name}>
-              {country.name}
+          <option value="">Ville d&apos;arrivee (toutes)</option>
+          {supportedCities.map((city) => (
+            <option key={city} value={city}>
+              {city}
             </option>
           ))}
         </select>

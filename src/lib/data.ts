@@ -7,6 +7,19 @@ export const supportedCountries = [
   { name: "Togo", code: "tg" },
 ] as const;
 
+export const supportedCities = [
+  "Bruxelles",
+  "Anvers",
+  "Liege",
+  "Charleroi",
+  "Cotonou",
+  "Porto-Novo",
+  "Douala",
+  "Yaounde",
+  "Lome",
+  "Kara",
+] as const;
+
 export const trips: Trip[] = [
   {
     id: "TRIP-001",

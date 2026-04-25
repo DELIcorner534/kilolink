@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { trips, reviews, supportedCountries } from "@/lib/data";
+import { trips, reviews, supportedCities, supportedCountries } from "@/lib/data";
 import { CountryFlag } from "@/components/country-flag";
 import { TripCard } from "@/components/trip-card";
 
@@ -39,11 +39,11 @@ export default function Home() {
             <select
               name="origin"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-800 outline-none transition focus:border-slate-300 focus:bg-white"
-              defaultValue="Belgique"
+              defaultValue="Bruxelles"
             >
-              {supportedCountries.map((country) => (
-                <option key={country.name} value={country.name}>
-                  {country.name}
+              {supportedCities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
                 </option>
               ))}
             </select>
@@ -55,10 +55,10 @@ export default function Home() {
               className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-800 outline-none transition focus:border-slate-300 focus:bg-white"
               defaultValue=""
             >
-              <option value="">Choisir une destination</option>
-              {partnerCountries.map((country) => (
-                <option key={country.name} value={country.name}>
-                  {country.name}
+              <option value="">Choisir une ville de destination</option>
+              {supportedCities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
                 </option>
               ))}
             </select>

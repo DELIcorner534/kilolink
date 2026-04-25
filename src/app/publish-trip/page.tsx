@@ -2,7 +2,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { CountryFlag } from "@/components/country-flag";
 import { EnvWarning } from "@/components/env-warning";
 import { FormSubmitButton } from "@/components/form-submit-button";
-import { supportedCountries } from "@/lib/data";
+import { supportedCities, supportedCountries } from "@/lib/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -68,21 +68,21 @@ export default async function PublishTripPage({
         <form action={createTripAction} className="grid gap-4 md:grid-cols-2">
         <select name="origin" className="rounded-xl border border-slate-200 p-3" required defaultValue="">
           <option value="" disabled>
-            Pays de depart
+            Ville de depart
           </option>
-          {supportedCountries.map((country) => (
-            <option key={country.name} value={country.name}>
-              {country.name}
+          {supportedCities.map((city) => (
+            <option key={city} value={city}>
+              {city}
             </option>
           ))}
         </select>
         <select name="destination" className="rounded-xl border border-slate-200 p-3" required defaultValue="">
           <option value="" disabled>
-            Pays de destination
+            Ville de destination
           </option>
-          {supportedCountries.map((country) => (
-            <option key={country.name} value={country.name}>
-              {country.name}
+          {supportedCities.map((city) => (
+            <option key={city} value={city}>
+              {city}
             </option>
           ))}
         </select>
