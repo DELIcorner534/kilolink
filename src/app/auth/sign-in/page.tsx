@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { EnvWarning } from "@/components/env-warning";
 import { FormSubmitButton } from "@/components/form-submit-button";
+import { PasswordField } from "@/components/password-field";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 async function signInAction(formData: FormData) {
@@ -49,13 +50,17 @@ export default async function SignInPage({
           placeholder="Email"
           required
         />
-        <input
+        <PasswordField
           name="password"
-          type="password"
           className="w-full rounded-xl border border-slate-200 bg-slate-50/60 p-3 outline-none ring-[#0b1f4d]/20 transition focus:ring-4"
           placeholder="Mot de passe"
           required
         />
+        <div className="-mt-1 text-right">
+          <Link href="/auth/forgot-password" className="text-sm font-medium text-[#0b1f4d] hover:underline">
+            Mot de passe oublie ?
+          </Link>
+        </div>
         <FormSubmitButton
           idleLabel="Se connecter"
           loadingLabel="Connexion..."

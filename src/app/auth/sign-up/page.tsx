@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { EnvWarning } from "@/components/env-warning";
 import { FormSubmitButton } from "@/components/form-submit-button";
+import { PasswordField } from "@/components/password-field";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 async function signUpAction(formData: FormData) {
@@ -69,9 +70,8 @@ export default async function SignUpPage({
           placeholder="Email"
           required
         />
-        <input
+        <PasswordField
           name="password"
-          type="password"
           className="w-full rounded-xl border border-slate-200 bg-slate-50/60 p-3 outline-none ring-[#0b1f4d]/20 transition focus:ring-4"
           placeholder="Mot de passe"
           minLength={8}
