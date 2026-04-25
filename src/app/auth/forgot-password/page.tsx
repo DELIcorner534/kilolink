@@ -12,7 +12,7 @@ async function forgotPasswordAction(formData: FormData) {
     redirect("/auth/forgot-password?error=Configuration+Supabase+manquante");
   }
 
-  const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/auth/sign-in`;
+  const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/auth/update-password`;
   const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
 
   if (error) {

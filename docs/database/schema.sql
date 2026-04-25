@@ -4,12 +4,16 @@ create table if not exists profiles (
   id uuid primary key default gen_random_uuid(),
   user_id uuid unique not null references auth.users(id) on delete cascade,
   full_name text not null,
+  role text not null default 'user' check (role in ('user', 'admin')),
   avatar_url text,
   phone text,
   country text,
   rating numeric(2,1) default 5.0,
   created_at timestamptz not null default now()
 );
+
+alter table profiles
+  add column if not exists role text not null default 'user' check (role in ('user', 'admin'));
 
 create table if not exists trips (
   id uuid primary key default gen_random_uuid(),
@@ -148,3 +152,6 @@ using (
   )
 );
 create policy "messages_insert_sender" on messages for insert with check (auth.uid() = sender_id);
+
+-- Promote an account to admin (run manually with a known user UUID)
+-- update profiles set role = 'admin' where user_id = 'YOUR_USER_UUID';

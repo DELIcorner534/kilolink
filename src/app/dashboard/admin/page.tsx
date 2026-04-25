@@ -24,6 +24,16 @@ export default async function AdminPage() {
     redirect("/auth/sign-in");
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (!profile || profile.role !== "admin") {
+    redirect("/dashboard");
+  }
+
   return (
     <DashboardShell title="Admin panel">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

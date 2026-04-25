@@ -9,7 +9,6 @@ const dashboardLinks = [
   { href: "/publish-trip", label: "Publier trajet" },
   { href: "/booking/new", label: "Reserver espace" },
   { href: "/messages", label: "Messagerie" },
-  { href: "/dashboard/admin", label: "Admin panel" },
 ];
 
 type DashboardShellProps = {

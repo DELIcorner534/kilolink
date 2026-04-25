@@ -20,9 +20,6 @@ export function SiteFooter() {
             <li>
               <Link href="/publish-trip">Publier un trajet</Link>
             </li>
-            <li>
-              <Link href="/dashboard/admin">Admin panel</Link>
-            </li>
           </ul>
         </div>
         <div>
