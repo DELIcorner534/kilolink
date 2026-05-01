@@ -14,9 +14,10 @@ type RealtimeChatProps = {
   bookingId: string;
   currentUserId: string;
   initialMessages: Message[];
+  peerLabel?: string;
 };
 
-export function RealtimeChat({ bookingId, currentUserId, initialMessages }: RealtimeChatProps) {
+export function RealtimeChat({ bookingId, currentUserId, initialMessages, peerLabel = "Autre participant" }: RealtimeChatProps) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [draft, setDraft] = useState("");
@@ -66,7 +67,9 @@ export function RealtimeChat({ bookingId, currentUserId, initialMessages }: Real
       <div className="space-y-3">
         {messages.map((message) => (
           <article key={message.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs font-semibold text-slate-500">{message.sender_id === currentUserId ? "Vous" : "Voyageur"}</p>
+            <p className="text-xs font-semibold text-slate-500">
+              {message.sender_id === currentUserId ? "Vous" : peerLabel}
+            </p>
             <p className="mt-1 text-slate-700">{message.content}</p>
           </article>
         ))}

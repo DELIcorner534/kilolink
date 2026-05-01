@@ -9,7 +9,7 @@ Plateforme web premium de transport de colis diaspora (Belgique ⇄ Afrique), co
 ## Lancer en local
 
 1. Copier `.env.example` vers `.env.local`
-2. Renseigner les cles Supabase/Stripe/Resend
+2. Renseigner les cles Supabase/Stripe
 3. Executer:
 
 ```bash
@@ -25,11 +25,28 @@ Puis ouvrir [http://localhost:3000](http://localhost:3000).
 - `src/components`: composants UI reutilisables
 - `src/lib`: types, data mocks, clients Supabase/Stripe
 - `docs/database/schema.sql`: schema SQL de base
-- `docs/DELIVERY_PLAN.md`: devis, planning, recommandations
+- `docs/database/migration_phase_complete.sql`: migration SQL complementaire
+- `docs/GO_LIVE_RUNBOOK.md`: checklist finale de mise en production
 
-## Prochaines etapes techniques
+## Configuration externe obligatoire
 
-- Brancher Supabase Auth et RLS
-- Connecter formulaires aux vraies tables PostgreSQL
-- Ajouter webhooks Stripe pour validation des paiements
-- Ajouter envoi d'emails transactionnels avec Resend
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `NEXT_PUBLIC_APP_URL`
+
+## Verification rapide avant prod
+
+1. Executer `docs/database/migration_phase_complete.sql` dans Supabase SQL editor.
+2. Activer Realtime sur la table `messages`.
+3. Configurer le webhook Stripe vers `/api/stripe/webhook`.
+4. Lancer:
+
+```bash
+npm run build
+```
+
+5. Valider le parcours metier complet:
+   - publier trajet -> reserver -> accepter -> payer -> marquer terminee -> laisser avis.

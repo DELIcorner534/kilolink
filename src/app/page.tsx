@@ -1,9 +1,15 @@
 import Link from "next/link";
-import { trips, reviews, supportedCities, supportedCountries } from "@/lib/data";
+import { trips as demoTrips, reviews, supportedCities, supportedCountries } from "@/lib/data";
 import { CountryFlag } from "@/components/country-flag";
 import { TripCard } from "@/components/trip-card";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { fetchActiveTripsWithProfiles } from "@/lib/trips";
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createSupabaseServerClient();
+  const liveTrips = supabase ? await fetchActiveTripsWithProfiles(supabase, { limit: 6 }) : [];
+  const tripCards = liveTrips.length ? liveTrips : demoTrips;
+
   const belgium = supportedCountries.find((country) => country.name === "Belgique");
   const partnerCountries = supportedCountries.filter((country) => country.name !== "Belgique");
   const trustStats = [
@@ -113,14 +119,16 @@ export default function Home() {
         <div className="flex items-end justify-between gap-3">
           <div>
             <h2 className="font-display text-3xl font-semibold tracking-tight text-slate-900">Trajets populaires</h2>
-            <p className="mt-1 text-sm text-slate-600">Des voyageurs actifs chaque semaine sur les corridors principaux.</p>
+            <p className="mt-1 text-sm text-slate-600">
+              {liveTrips.length ? "Trajets actifs depuis la base." : "Exemples — connectez Supabase pour afficher les vrais trajets."}
+            </p>
           </div>
           <Link href="/search" className="text-sm font-semibold text-[#0b1f4d] hover:underline">
             Voir tous les trajets
           </Link>
         </div>
         <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {trips.map((trip) => (
+          {tripCards.map((trip) => (
             <TripCard key={trip.id} trip={trip} />
           ))}
         </div>

@@ -2,7 +2,7 @@ import { TripCard } from "@/components/trip-card";
 import { EnvWarning } from "@/components/env-warning";
 import { supportedCities } from "@/lib/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { Trip } from "@/lib/types";
+import { fetchActiveTripsWithProfiles } from "@/lib/trips";
 import Link from "next/link";
 
 export default async function SearchPage({
@@ -26,33 +26,12 @@ export default async function SearchPage({
     );
   }
 
-  let query = supabase.from("trips").select("*").order("departure_date", { ascending: true }).limit(24);
-
-  if (params.origin) {
-    query = query.ilike("origin", `%${params.origin}%`);
-  }
-  if (params.destination) {
-    query = query.ilike("destination", `%${params.destination}%`);
-  }
-  if (params.date) {
-    query = query.eq("departure_date", params.date);
-  }
-
-  const { data } = await query;
-
-  const tripCards: Trip[] =
-    data?.map((trip) => ({
-      id: trip.id,
-      travelerName: "Voyageur verifie",
-      travelerAvatar: "V",
-      rating: 5,
-      origin: trip.origin,
-      destination: trip.destination,
-      departureDate: trip.departure_date,
-      kilosAvailable: trip.kilos_available,
-      pricePerKg: Number(trip.price_per_kg),
-      airline: trip.airline ?? "N/A",
-    })) ?? [];
+  const tripCards = await fetchActiveTripsWithProfiles(supabase, {
+    origin: params.origin,
+    destination: params.destination,
+    date: params.date,
+    limit: 24,
+  });
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-10 md:py-14">

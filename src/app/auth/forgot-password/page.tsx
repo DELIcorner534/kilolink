@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { FormSubmitButton } from "@/components/form-submit-button";
@@ -12,7 +13,15 @@ async function forgotPasswordAction(formData: FormData) {
     redirect("/auth/forgot-password?error=Configuration+Supabase+manquante");
   }
 
-  const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/auth/update-password`;
+  const headersList = await headers();
+  const host = headersList.get("x-forwarded-host") ?? headersList.get("host");
+  const proto = headersList.get("x-forwarded-proto") ?? "http";
+  const originFromRequest = host ? `${proto}://${host}` : null;
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL?.trim() || originFromRequest || "http://localhost:3000").replace(
+    /\/$/,
+    "",
+  );
+  const redirectTo = `${baseUrl}/auth/update-password`;
   const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
 
   if (error) {

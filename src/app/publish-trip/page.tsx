@@ -105,9 +105,10 @@ export default async function PublishTripPage({
         <input
           name="pricePerKg"
           type="number"
-          min={1}
+          min={0}
+          step="0.01"
           className="rounded-xl border border-slate-200 p-3"
-          placeholder="Prix par kilo"
+          placeholder="Prix par kilo (EUR)"
           required
         />
         <input

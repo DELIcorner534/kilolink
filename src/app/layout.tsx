@@ -27,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={`${inter.variable} ${poppins.variable} h-full antialiased`}>
+    <html lang="fr" suppressHydrationWarning className={`${inter.variable} ${poppins.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-slate-50">
         <SiteHeader />
         <div className="flex-1">{children}</div>

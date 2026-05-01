@@ -23,7 +23,7 @@ async function signOutAction() {
 export async function SiteHeader() {
   const supabase = await createSupabaseServerClient();
   if (!supabase) {
-    // No user info available without Supabase
+
     return (
       <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3.5">

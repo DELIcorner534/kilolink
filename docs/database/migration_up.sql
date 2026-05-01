@@ -1,3 +1,7 @@
+-- KiloLink database migration (up)
+-- Apply this in Supabase SQL editor or via your migration runner.
+-- This migration is idempotent where feasible.
+
 create extension if not exists pgcrypto;
 
 create table if not exists profiles (
@@ -80,8 +84,6 @@ create table if not exists payments (
 );
 alter table payments
   add column if not exists updated_at timestamptz not null default now();
-alter table payments
-  add column if not exists stripe_checkout_session_id text unique;
 
 create table if not exists disputes (
   id uuid primary key default gen_random_uuid(),
@@ -137,13 +139,9 @@ end $$;
 
 do $$
 begin
-  if exists (select 1 from pg_constraint where conname = 'trips_kilos_available_positive') then
-    alter table trips drop constraint trips_kilos_available_positive;
-  end if;
-
-  if not exists (select 1 from pg_constraint where conname = 'trips_kilos_available_non_negative') then
+  if not exists (select 1 from pg_constraint where conname = 'trips_kilos_available_positive') then
     alter table trips
-      add constraint trips_kilos_available_non_negative check (kilos_available >= 0);
+      add constraint trips_kilos_available_positive check (kilos_available > 0);
   end if;
 
   if not exists (select 1 from pg_constraint where conname = 'trips_price_per_kg_non_negative') then
@@ -289,122 +287,6 @@ before insert on bookings
 for each row
 execute function validate_booking_insert();
 
-create or replace function apply_booking_status_kilos()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  v_avail int;
-  v_new_status text;
-begin
-  if tg_op <> 'UPDATE' or old.status is not distinct from new.status then
-    return new;
-  end if;
-
-  if old.status = 'pending' and new.status = 'accepted' then
-    select t.kilos_available into v_avail from trips t where t.id = new.trip_id for update;
-    if v_avail is null then
-      raise exception 'Trip not found';
-    end if;
-    if v_avail < new.kilos_requested then
-      raise exception 'Not enough kilos available';
-    end if;
-    v_new_status := case when v_avail - new.kilos_requested <= 0 then 'full' else null end;
-    update trips t
-    set kilos_available = v_avail - new.kilos_requested,
-        status = coalesce(v_new_status, t.status)
-    where t.id = new.trip_id;
-    return new;
-  end if;
-
-  if old.status = 'accepted' and new.status in ('cancelled', 'rejected') then
-    update trips t
-    set kilos_available = t.kilos_available + old.kilos_requested,
-        status = case
-          when t.status = 'full' and t.kilos_available + old.kilos_requested > 0 then 'active'
-          else t.status
-        end
-    where t.id = old.trip_id;
-    return new;
-  end if;
-
-  return new;
-end;
-$$;
-
-drop trigger if exists trg_apply_booking_status_kilos on bookings;
-create trigger trg_apply_booking_status_kilos
-after update of status on bookings
-for each row
-execute function apply_booking_status_kilos();
-
-create or replace function notify_booking_status_change()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  v_traveler_id uuid;
-begin
-  if old.status is not distinct from new.status then
-    return new;
-  end if;
-  select t.traveler_id into v_traveler_id from trips t where t.id = new.trip_id;
-
-  if new.status = 'accepted' and v_traveler_id is not null then
-    insert into notifications (user_id, type, title, payload)
-    values (
-      new.sender_id,
-      'booking',
-      'Reservation acceptee',
-      jsonb_build_object('booking_id', new.id, 'status', new.status)
-    );
-  elsif new.status = 'rejected' then
-    insert into notifications (user_id, type, title, payload)
-    values (
-      new.sender_id,
-      'booking',
-      'Reservation refusee',
-      jsonb_build_object('booking_id', new.id, 'status', new.status)
-    );
-  elsif new.status = 'cancelled' and v_traveler_id is not null then
-    insert into notifications (user_id, type, title, payload)
-    values (
-      v_traveler_id,
-      'booking',
-      'Reservation annulee par l expediteur',
-      jsonb_build_object('booking_id', new.id, 'status', new.status)
-    );
-  elsif new.status = 'completed' and v_traveler_id is not null then
-    insert into notifications (user_id, type, title, payload)
-    values (
-      v_traveler_id,
-      'booking',
-      'Reservation marquee comme terminee',
-      jsonb_build_object('booking_id', new.id, 'status', new.status)
-    );
-    insert into notifications (user_id, type, title, payload)
-    values (
-      new.sender_id,
-      'booking',
-      'Reservation marquee comme terminee',
-      jsonb_build_object('booking_id', new.id, 'status', new.status)
-    );
-  end if;
-
-  return new;
-end;
-$$;
-
-drop trigger if exists trg_notify_booking_status on bookings;
-create trigger trg_notify_booking_status
-after update of status on bookings
-for each row
-execute function notify_booking_status_change();
-
 create or replace function recalculate_profile_rating()
 returns trigger
 language plpgsql
@@ -443,7 +325,6 @@ alter table admin_logs enable row level security;
 drop policy if exists "profiles_select_own" on profiles;
 drop policy if exists "profiles_insert_own" on profiles;
 drop policy if exists "profiles_update_own" on profiles;
-drop policy if exists "profiles_read_travelers_with_listings" on profiles;
 
 drop policy if exists "trips_public_read" on trips;
 drop policy if exists "trips_insert_own" on trips;
@@ -458,8 +339,6 @@ drop policy if exists "messages_insert_sender" on messages;
 drop policy if exists "reviews_read_participants" on reviews;
 drop policy if exists "reviews_insert_participants" on reviews;
 drop policy if exists "payments_read_participants" on payments;
-drop policy if exists "payments_insert_sender" on payments;
-drop policy if exists "payments_update_sender" on payments;
 drop policy if exists "payments_manage_admin" on payments;
 drop policy if exists "disputes_read_participants_or_admin" on disputes;
 drop policy if exists "disputes_insert_participants" on disputes;
@@ -472,14 +351,6 @@ drop policy if exists "admin_logs_insert_admin" on admin_logs;
 create policy "profiles_select_own" on profiles for select using (auth.uid() = user_id);
 create policy "profiles_insert_own" on profiles for insert with check (auth.uid() = user_id);
 create policy "profiles_update_own" on profiles for update using (auth.uid() = user_id);
-create policy "profiles_read_travelers_with_listings" on profiles for select using (
-  exists (
-    select 1
-    from trips t
-    where t.traveler_id = profiles.user_id
-      and t.status in ('active', 'full')
-  )
-);
 
 create policy "trips_public_read" on trips for select using (true);
 create policy "trips_insert_own" on trips for insert with check (auth.uid() = traveler_id);
@@ -591,36 +462,6 @@ using (
     join trips t on t.id = b.trip_id
     where b.id = booking_id
       and t.traveler_id = auth.uid()
-  )
-);
-
-create policy "payments_insert_sender" on payments
-for insert
-with check (
-  exists (
-    select 1
-    from bookings b
-    where b.id = booking_id
-      and b.sender_id = auth.uid()
-  )
-);
-
-create policy "payments_update_sender" on payments
-for update
-using (
-  exists (
-    select 1
-    from bookings b
-    where b.id = booking_id
-      and b.sender_id = auth.uid()
-  )
-)
-with check (
-  exists (
-    select 1
-    from bookings b
-    where b.id = booking_id
-      and b.sender_id = auth.uid()
   )
 );
 

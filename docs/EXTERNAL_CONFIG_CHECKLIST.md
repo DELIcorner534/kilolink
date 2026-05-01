@@ -9,8 +9,9 @@ A configurer dans Vercel (Project Settings -> Environment Variables):
 - `NEXT_PUBLIC_APP_URL=https://ton-domaine.com`
 - `NEXT_PUBLIC_SUPABASE_URL=...`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY=...`
+- `SUPABASE_SERVICE_ROLE_KEY=...` (necessaire pour webhook Stripe + stats admin)
 - `STRIPE_SECRET_KEY=sk_live_...` (ou `sk_test_...` en preprod)
-- `RESEND_API_KEY=...` (si emails transactionnels actives)
+- `STRIPE_WEBHOOK_SECRET=whsec_...`
 
 Conseils:
 
@@ -23,6 +24,7 @@ Conseils:
 ## 2.1 Base de donnees
 
 - Executer le schema SQL: `docs/database/schema.sql`.
+- Executer ensuite: `docs/database/migration_phase_complete.sql`.
 - Verifier que les policies RLS sont bien actives.
 
 ## 2.2 Auth
@@ -32,7 +34,13 @@ Conseils:
 - Redirect URLs:
   - `https://ton-domaine.com/auth/sign-in`
   - `https://ton-domaine.com/auth/forgot-password`
+  - `https://ton-domaine.com/auth/update-password`
   - `https://ton-domaine.com/dashboard`
+- En local, ajouter aussi:
+  - `http://localhost:3000/auth/update-password`
+  - (optionnel) `http://127.0.0.1:3000/auth/update-password`
+
+Sans ces URLs, le lien email de reinitialisation peut avoir `redirect_to` vide et ne pas ouvrir la page de nouveau mot de passe.
 
 ## 2.3 Realtime
 
@@ -47,13 +55,11 @@ Conseils:
 
 ## 3.2 Webhook recommande (fortement)
 
-Le projet fonctionne deja avec checkout, mais pour un go-live solide il faut ajouter un webhook Stripe:
+Le projet expose deja le webhook, il faut le connecter dans Stripe Dashboard:
 
-- Endpoint a creer (exemple): `/api/stripe/webhook`
+- Endpoint: `https://ton-domaine.com/api/stripe/webhook`
 - Evenements minimum:
   - `checkout.session.completed`
-  - `payment_intent.succeeded`
-  - `payment_intent.payment_failed`
 
 But:
 
@@ -110,6 +116,6 @@ Quand envisager un vrai serveur hybride dedie:
 
 ## 7) Risques restants a corriger vite (avant prod)
 
-- `dashboard/admin` est protege par login, mais pas encore par role admin strict.
-- Le webhook Stripe n'est pas encore branche dans le repo.
+- Verifier que `SUPABASE_SERVICE_ROLE_KEY` et `STRIPE_WEBHOOK_SECRET` sont bien definies en prod.
 - Prevoir monitoring (Sentry/Logs Vercel) pour les erreurs runtime.
+- Ajouter un traitement webhook supplementaire pour `checkout.session.expired` (optionnel mais conseille).

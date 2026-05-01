@@ -7,8 +7,6 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 export default function UpdatePasswordPage() {
   const router = useRouter();
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,6 +15,11 @@ export default function UpdatePasswordPage() {
     event.preventDefault();
     setError("");
     setSuccess("");
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const password = String(formData.get("password") ?? "");
+    const confirmPassword = String(formData.get("confirmPassword") ?? "");
 
     if (password.length < 8) {
       setError("Le mot de passe doit contenir au moins 8 caracteres.");

@@ -1,5 +1,4 @@
 import { DashboardShell } from "@/components/dashboard-shell";
-import { CheckoutButton } from "@/components/checkout-button";
 import { EnvWarning } from "@/components/env-warning";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -38,7 +37,7 @@ async function createBookingAction(formData: FormData) {
     redirect(`/booking/new?error=${encodeURIComponent(error.message)}`);
   }
 
-  redirect(`/messages?bookingId=${data.id}&success=booking`);
+  redirect(`/booking/${data.id}?new=1`);
 }
 
 export default async function NewBookingPage({
@@ -106,7 +105,6 @@ export default async function NewBookingPage({
           {params.error ? <p className="text-sm text-red-600">{params.error}</p> : null}
         </form>
       ) : null}
-      {supabase ? <CheckoutButton /> : null}
     </DashboardShell>
   );
 }
