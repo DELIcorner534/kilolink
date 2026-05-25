@@ -9,7 +9,7 @@ import type { Metadata } from "next";
  */
 const ANDROID_APK_URL =
   process.env.NEXT_PUBLIC_ANDROID_APK_URL ??
-  "https://expo.dev/accounts/amougba/projects/kilolink-app/builds/f559257a-de45-4c75-a2ae-7d6d92833e3e";
+  "https://expo.dev/accounts/amougba/projects/kilolink-app/builds/60ac1f84-7752-472d-9c78-e70f793cc3e9";
 
 export const metadata: Metadata = {
   title: "Télécharger l'app KiloLink",
