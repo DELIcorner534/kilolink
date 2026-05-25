@@ -4,7 +4,8 @@ export type Trip = {
   id: string;
   travelerName: string;
   travelerAvatar: string;
-  rating: number;
+  /** Average from profile when the traveler has at least one review; otherwise null. */
+  rating: number | null;
   origin: string;
   destination: string;
   departureDate: string;

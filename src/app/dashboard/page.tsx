@@ -1,5 +1,8 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { EnvWarning } from "@/components/env-warning";
+import { ReferralPanel } from "@/components/referral-panel";
+import { isProfileAdmin } from "@/lib/profile-role";
+import { fetchMyReferralCode, fetchReferralStats } from "@/lib/referral";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { countMessagesForUser, sumPaymentsForUser } from "@/lib/metrics";
 import Link from "next/link";
@@ -27,7 +30,7 @@ export default async function DashboardPage({
   const supabase = await createSupabaseServerClient();
   if (!supabase) {
     return (
-      <DashboardShell title="Dashboard utilisateur">
+      <DashboardShell title="Tableau de bord">
         <EnvWarning />
       </DashboardShell>
     );
@@ -40,12 +43,19 @@ export default async function DashboardPage({
     redirect("/auth/sign-in");
   }
 
+  const showAdminLink = await isProfileAdmin(supabase, user.id);
+
+  const [referralCode, referralStats] = await Promise.all([
+    fetchMyReferralCode(supabase, user.id),
+    fetchReferralStats(supabase, user.id),
+  ]);
+
   const [{ count: tripsCount }, { count: bookingsAsSenderCount }, msgCount, paymentSum, { data: myTrips }, { data: bookingsAsSender }, travelerTripsRes] =
     await Promise.all([
       supabase.from("trips").select("*", { count: "exact", head: true }).eq("traveler_id", user.id),
       supabase.from("bookings").select("*", { count: "exact", head: true }).eq("sender_id", user.id),
       countMessagesForUser(supabase, user.id),
-      sumPaymentsForUser(supabase),
+      sumPaymentsForUser(supabase, user.id),
       supabase.from("trips").select("id, origin, destination, departure_date, status").eq("traveler_id", user.id).order("created_at", { ascending: false }).limit(8),
       supabase
         .from("bookings")
@@ -69,21 +79,21 @@ export default async function DashboardPage({
 
   const metrics = [
     { label: "Mes trajets", value: String(tripsCount ?? 0).padStart(2, "0") },
-    { label: "Reservations (expediteur)", value: String(bookingsAsSenderCount ?? 0).padStart(2, "0") },
+    { label: "Réservations (expéditeur)", value: String(bookingsAsSenderCount ?? 0).padStart(2, "0") },
     { label: "Messages (toutes conv.)", value: String(msgCount).padStart(2, "0") },
-    { label: "Paiements confirmes", value: `${paymentSum.toFixed(2)} EUR` },
+    { label: "Paiements confirmés", value: `${paymentSum.toFixed(2)} €` },
   ];
 
   return (
-    <DashboardShell title="Dashboard utilisateur">
+    <DashboardShell title="Tableau de bord" showAdminLink={showAdminLink}>
       {params.success === "trip" ? (
         <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-          Trajet publie avec succes. Vous pouvez maintenant suivre les demandes de reservation.
+          Trajet publié avec succès. Vous pouvez maintenant suivre les demandes de réservation.
         </div>
       ) : null}
       {params.payment === "success" ? (
         <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-          Paiement recu. Merci !
+          Paiement reçu. Merci !
         </div>
       ) : null}
       {params.error ? (
@@ -118,6 +128,14 @@ export default async function DashboardPage({
         </Link>
       </section>
 
+      {referralCode ? (
+        <ReferralPanel
+          code={referralCode}
+          stats={referralStats}
+          publicSiteUrl={process.env.NEXT_PUBLIC_SITE_URL ?? "https://kilolink.be"}
+        />
+      ) : null}
+
       <section className="mt-10">
         <h2 className="text-lg font-semibold text-slate-900">Mes trajets</h2>
         <ul className="mt-3 space-y-2">
@@ -136,7 +154,7 @@ export default async function DashboardPage({
       </section>
 
       <section className="mt-8">
-        <h2 className="text-lg font-semibold text-slate-900">Reservations recues (voyageur)</h2>
+        <h2 className="text-lg font-semibold text-slate-900">Réservations reçues (voyageur)</h2>
         <ul className="mt-3 space-y-2">
           {(bookingsAsTraveler ?? []).length === 0 ? (
             <li className="text-sm text-slate-600">Aucune demande pour vos trajets.</li>
@@ -149,7 +167,7 @@ export default async function DashboardPage({
                     {tr ? `${tr.origin} → ${tr.destination}` : "Trajet"} · {b.kilos_requested} kg · {b.status}
                   </span>
                   <Link href={`/booking/${b.id}`} className="font-semibold text-[#0b1f4d]">
-                    Gerer
+                    Gérer
                   </Link>
                 </li>
               );
@@ -159,10 +177,10 @@ export default async function DashboardPage({
       </section>
 
       <section className="mt-8">
-        <h2 className="text-lg font-semibold text-slate-900">Mes reservations (expediteur)</h2>
+        <h2 className="text-lg font-semibold text-slate-900">Mes réservations (expéditeur)</h2>
         <ul className="mt-3 space-y-2">
           {(bookingsAsSender ?? []).length === 0 ? (
-            <li className="text-sm text-slate-600">Aucune reservation. Cherchez un trajet depuis la recherche.</li>
+            <li className="text-sm text-slate-600">Aucune réservation. Cherchez un trajet depuis la recherche.</li>
           ) : (
             (bookingsAsSender ?? []).map((b) => {
               const tr = tripRow(b.trips);

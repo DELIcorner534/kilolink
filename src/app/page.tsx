@@ -1,21 +1,22 @@
 import Link from "next/link";
-import { trips as demoTrips, reviews, supportedCities, supportedCountries } from "@/lib/data";
+import { supportedCountries } from "@/lib/data";
 import { CountryFlag } from "@/components/country-flag";
 import { TripCard } from "@/components/trip-card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchActiveTripsWithProfiles } from "@/lib/trips";
+import { fetchRecentReviews } from "@/lib/content";
 
 export default async function Home() {
   const supabase = await createSupabaseServerClient();
   const liveTrips = supabase ? await fetchActiveTripsWithProfiles(supabase, { limit: 6 }) : [];
-  const tripCards = liveTrips.length ? liveTrips : demoTrips;
+  const liveReviews = supabase ? await fetchRecentReviews(supabase, 3) : [];
 
   const belgium = supportedCountries.find((country) => country.name === "Belgique");
   const partnerCountries = supportedCountries.filter((country) => country.name !== "Belgique");
   const trustStats = [
-    { label: "Trajets actifs / semaine", value: "1 200+" },
-    { label: "Membres verifies", value: "95%" },
-    { label: "Paiements securises", value: "100%" },
+    { title: "Trajets publiés en temps réel", description: "Offres mises à jour directement depuis la plateforme." },
+    { title: "Profils vérifiés", description: "Comptes contrôlés pour des échanges plus fiables." },
+    { title: "Paiements sécurisés", description: "Transactions traitées avec des standards de sécurité élevés." },
   ];
 
   return (
@@ -30,8 +31,8 @@ export default async function Home() {
             Covoiturage colis fiable, simple et professionnel
           </h1>
           <p className="mt-3 max-w-3xl text-slate-600 md:text-lg">
-            Trouvez un voyageur, reservez vos kilos, payez en securite et discutez en direct, sur une plateforme inspiree
-            des meilleurs standards du marche.
+            Trouvez un voyageur, réservez vos kilos, payez en sécurité et discutez en direct, sur une plateforme inspirée
+            des meilleurs standards du marché.
           </p>
         </div>
 
@@ -41,15 +42,15 @@ export default async function Home() {
           className="relative z-10 mt-7 grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_10px_30px_rgba(15,23,42,0.08)] md:grid-cols-12 md:items-center"
         >
           <div className="md:col-span-3">
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Depart</label>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Départ</label>
             <select
               name="origin"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-800 outline-none transition focus:border-slate-300 focus:bg-white"
-              defaultValue="Bruxelles"
+              defaultValue="Belgique"
             >
-              {supportedCities.map((city) => (
-                <option key={city} value={city}>
-                  {city}
+              {supportedCountries.map((country) => (
+                <option key={country.name} value={country.name}>
+                  {country.name}
                 </option>
               ))}
             </select>
@@ -61,10 +62,10 @@ export default async function Home() {
               className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-800 outline-none transition focus:border-slate-300 focus:bg-white"
               defaultValue=""
             >
-              <option value="">Choisir une ville de destination</option>
-              {supportedCities.map((city) => (
-                <option key={city} value={city}>
-                  {city}
+              <option value="">Choisir un pays de destination</option>
+              {supportedCountries.map((country) => (
+                <option key={country.name} value={country.name}>
+                  {country.name}
                 </option>
               ))}
             </select>
@@ -86,9 +87,9 @@ export default async function Home() {
         </form>
 
         <div className="relative z-10 mt-4 flex flex-wrap gap-2 text-xs font-semibold text-slate-600 md:text-sm">
-          <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5">Paiement securise Stripe</span>
-          <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5">Profils verifies</span>
-          <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5">Messagerie instantanee</span>
+          <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5">Paiement sécurisé Stripe</span>
+          <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5">Profils vérifiés</span>
+          <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5">Messagerie instantanée</span>
         </div>
         <div className="relative z-10 mt-5 flex flex-wrap gap-3">
           <Link
@@ -108,9 +109,9 @@ export default async function Home() {
 
       <section className="grid gap-4 md:grid-cols-3">
         {trustStats.map((item) => (
-          <article key={item.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
-            <p className="text-2xl font-bold text-[#0b1f4d]">{item.value}</p>
-            <p className="mt-1 text-sm text-slate-600">{item.label}</p>
+          <article key={item.title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
+            <p className="text-lg font-bold text-[#0b1f4d]">{item.title}</p>
+            <p className="mt-1 text-sm text-slate-600">{item.description}</p>
           </article>
         ))}
       </section>
@@ -119,19 +120,23 @@ export default async function Home() {
         <div className="flex items-end justify-between gap-3">
           <div>
             <h2 className="font-display text-3xl font-semibold tracking-tight text-slate-900">Trajets populaires</h2>
-            <p className="mt-1 text-sm text-slate-600">
-              {liveTrips.length ? "Trajets actifs depuis la base." : "Exemples — connectez Supabase pour afficher les vrais trajets."}
-            </p>
+            <p className="mt-1 text-sm text-slate-600">Trajets actifs depuis la base.</p>
           </div>
           <Link href="/search" className="text-sm font-semibold text-[#0b1f4d] hover:underline">
             Voir tous les trajets
           </Link>
         </div>
-        <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {tripCards.map((trip) => (
-            <TripCard key={trip.id} trip={trip} />
-          ))}
-        </div>
+        {liveTrips.length ? (
+          <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {liveTrips.map((trip) => (
+              <TripCard key={trip.id} trip={trip} />
+            ))}
+          </div>
+        ) : (
+          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
+            Aucun trajet actif pour le moment.
+          </div>
+        )}
       </section>
 
       <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)]">
@@ -185,16 +190,22 @@ export default async function Home() {
           </Link>
         </div>
         <div className="mt-4 grid gap-4 md:grid-cols-3">
-          {reviews.map((review) => (
-            <article
-              key={review.id}
-              className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_8px_20px_rgba(15,23,42,0.05)]"
-            >
-              <p className="mb-2 text-emerald-600">{"★".repeat(review.rating)}</p>
-              <p className="text-slate-700">{review.comment}</p>
-              <p className="mt-3 text-sm font-semibold text-slate-900">{review.author}</p>
+          {liveReviews.length ? (
+            liveReviews.map((review) => (
+              <article
+                key={review.id}
+                className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_8px_20px_rgba(15,23,42,0.05)]"
+              >
+                <p className="mb-2 text-emerald-600">{"★".repeat(review.rating)}</p>
+                <p className="text-slate-700">{review.comment}</p>
+                <p className="mt-3 text-sm font-semibold text-slate-900">{review.author}</p>
+              </article>
+            ))
+          ) : (
+            <article className="rounded-3xl border border-slate-200/80 bg-slate-50 p-6 text-sm text-slate-600 md:col-span-3">
+              Aucun avis vérifié publié pour le moment.
             </article>
-          ))}
+          )}
         </div>
       </section>
 
@@ -202,14 +213,14 @@ export default async function Home() {
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-100">Commencer en 2 minutes</p>
         <h2 className="mt-2 font-display text-3xl font-semibold">Tu veux envoyer ou transporter un colis ?</h2>
         <p className="mt-2 max-w-2xl text-blue-100">
-          Cree ton compte gratuitement, publie ou reserve un trajet et suis tout depuis ton tableau de bord.
+          Crée ton compte gratuitement, publie ou réserve un trajet et suis tout depuis ton tableau de bord.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
             href="/auth/sign-up"
             className="inline-flex min-w-56 items-center justify-center rounded-full border border-white/80 bg-white px-6 py-3 font-semibold !text-[#0b1f4d] shadow-sm"
           >
-            <span className="!text-[#0b1f4d]">Creer un compte</span>
+            <span className="!text-[#0b1f4d]">Créer un compte</span>
           </Link>
           <Link href="/publish-trip" className="rounded-full border border-white/40 px-6 py-3 font-semibold !text-white">
             Publier mon trajet

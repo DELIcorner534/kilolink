@@ -2,7 +2,8 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { CountryFlag } from "@/components/country-flag";
 import { EnvWarning } from "@/components/env-warning";
 import { FormSubmitButton } from "@/components/form-submit-button";
-import { supportedCities, supportedCountries } from "@/lib/data";
+import { supportedCountries } from "@/lib/data";
+import { isProfileAdmin } from "@/lib/profile-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -47,11 +48,20 @@ export default async function PublishTripPage({
 }) {
   const params = await searchParams;
   const supabase = await createSupabaseServerClient();
+  let showAdminLink = false;
+  if (supabase) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      showAdminLink = await isProfileAdmin(supabase, user.id);
+    }
+  }
 
   return (
-    <DashboardShell title="Publier un trajet">
+    <DashboardShell title="Publier un trajet" showAdminLink={showAdminLink}>
       {!supabase ? (
-        <EnvWarning title="Supabase non configure" />
+        <EnvWarning title="Supabase non configuré" />
       ) : (
         <>
         <div className="mb-4 flex flex-wrap gap-2">
@@ -68,21 +78,21 @@ export default async function PublishTripPage({
         <form action={createTripAction} className="grid gap-4 md:grid-cols-2">
         <select name="origin" className="rounded-xl border border-slate-200 p-3" required defaultValue="">
           <option value="" disabled>
-            Ville de depart
+            Pays de départ
           </option>
-          {supportedCities.map((city) => (
-            <option key={city} value={city}>
-              {city}
+          {supportedCountries.map((country) => (
+            <option key={country.name} value={country.name}>
+              {country.name}
             </option>
           ))}
         </select>
         <select name="destination" className="rounded-xl border border-slate-200 p-3" required defaultValue="">
           <option value="" disabled>
-            Ville de destination
+            Pays de destination
           </option>
-          {supportedCities.map((city) => (
-            <option key={city} value={city}>
-              {city}
+          {supportedCountries.map((country) => (
+            <option key={country.name} value={country.name}>
+              {country.name}
             </option>
           ))}
         </select>
@@ -90,10 +100,10 @@ export default async function PublishTripPage({
           name="departureDate"
           type="date"
           className="rounded-xl border border-slate-200 p-3"
-          placeholder="Date de depart"
+          placeholder="Date de départ"
           required
         />
-        <input name="airline" className="rounded-xl border border-slate-200 p-3" placeholder="Compagnie aerienne" />
+        <input name="airline" className="rounded-xl border border-slate-200 p-3" placeholder="Compagnie aérienne" />
         <input
           name="kilosAvailable"
           type="number"
@@ -108,13 +118,13 @@ export default async function PublishTripPage({
           min={0}
           step="0.01"
           className="rounded-xl border border-slate-200 p-3"
-          placeholder="Prix par kilo (EUR)"
+          placeholder="Prix par kilo (€)"
           required
         />
         <input
           name="acceptedItems"
           className="rounded-xl border border-slate-200 p-3 md:col-span-2"
-          placeholder="Objets acceptes"
+          placeholder="Objets acceptés"
         />
         <textarea
           name="description"

@@ -4,20 +4,25 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const dashboardLinks = [
+const baseDashboardLinks = [
   { href: "/dashboard", label: "Vue globale" },
-  { href: "/publish-trip", label: "Publier trajet" },
-  { href: "/booking/new", label: "Reserver espace" },
+  { href: "/publish-trip", label: "Publier un trajet" },
+  { href: "/booking/new", label: "Réserver un espace" },
   { href: "/messages", label: "Messagerie" },
 ];
 
 type DashboardShellProps = {
   title: string;
   children: ReactNode;
+  /** Only true for users with profiles.role = admin — do not show to regular members */
+  showAdminLink?: boolean;
 };
 
-export function DashboardShell({ title, children }: DashboardShellProps) {
+export function DashboardShell({ title, children, showAdminLink = false }: DashboardShellProps) {
   const pathname = usePathname();
+  const dashboardLinks = showAdminLink
+    ? [...baseDashboardLinks, { href: "/dashboard/admin", label: "Administration" }]
+    : baseDashboardLinks;
 
   return (
     <div className="mx-auto grid max-w-7xl gap-6 px-4 py-8 lg:grid-cols-[220px_1fr]">

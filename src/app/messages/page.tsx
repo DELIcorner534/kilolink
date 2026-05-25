@@ -1,6 +1,7 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { EnvWarning } from "@/components/env-warning";
 import { RealtimeChat } from "@/components/realtime-chat";
+import { isProfileAdmin } from "@/lib/profile-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -27,8 +28,8 @@ export default async function MessagesPage({
   const supabase = await createSupabaseServerClient();
   if (!supabase) {
     return (
-      <DashboardShell title="Messagerie temps reel">
-        <EnvWarning title="Supabase non configure" />
+      <DashboardShell title="Messagerie en temps réel" showAdminLink={false}>
+        <EnvWarning title="Supabase non configuré" />
       </DashboardShell>
     );
   }
@@ -39,6 +40,8 @@ export default async function MessagesPage({
   if (!user) {
     redirect("/auth/sign-in");
   }
+
+  const showAdminLink = await isProfileAdmin(supabase, user.id);
 
   const { data: senderBookings } = await supabase
     .from("bookings")
@@ -63,20 +66,37 @@ export default async function MessagesPage({
   const unique = new Map(convoList.map((b) => [b.id, b]));
   const conversations = [...unique.values()];
 
-  let bookingId = params.bookingId;
-  if (!bookingId && conversations[0]) {
-    bookingId = conversations[0].id;
-  }
-
-  if (!bookingId) {
+  if (!conversations.length) {
     return (
-      <DashboardShell title="Messagerie temps reel">
-        <p className="text-slate-600">Aucune conversation disponible. Creez d&apos;abord une reservation.</p>
+      <DashboardShell title="Messagerie en temps réel" showAdminLink={showAdminLink}>
+        <p className="text-slate-600">Aucune conversation disponible. Créez d&apos;abord une réservation.</p>
         <Link href="/search" className="mt-4 inline-block font-semibold text-[#0b1f4d]">
           Rechercher un trajet
         </Link>
       </DashboardShell>
     );
+  }
+
+  const requestedId = params.bookingId;
+  const bookingId =
+    requestedId && conversations.some((b) => b.id === requestedId) ? requestedId : conversations[0]!.id;
+
+  const { data: bookingForPeer } = await supabase
+    .from("bookings")
+    .select("sender_id, trips(traveler_id)")
+    .eq("id", bookingId)
+    .maybeSingle();
+
+  let peerLabel = "Autre participant";
+  if (bookingForPeer) {
+    const tripRaw = bookingForPeer.trips as { traveler_id: string } | { traveler_id: string }[] | null;
+    const travelerId = Array.isArray(tripRaw) ? tripRaw[0]?.traveler_id : tripRaw?.traveler_id;
+    if (travelerId) {
+      const peerId = user.id === travelerId ? bookingForPeer.sender_id : travelerId;
+      const { data: peerProfile } = await supabase.from("profiles").select("full_name").eq("user_id", peerId).maybeSingle();
+      const name = peerProfile?.full_name?.trim();
+      peerLabel = name && name.length > 0 ? name : user.id === travelerId ? "Expéditeur" : "Voyageur";
+    }
   }
 
   const { data: initialMessages } = await supabase
@@ -86,10 +106,10 @@ export default async function MessagesPage({
     .order("created_at", { ascending: true });
 
   return (
-    <DashboardShell title="Messagerie temps reel">
+    <DashboardShell title="Messagerie en temps réel" showAdminLink={showAdminLink}>
       {params.success === "booking" ? (
         <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-          Reservation creee. Vous pouvez maintenant ecrire au voyageur.
+          Réservation créée. Vous pouvez maintenant écrire au voyageur.
         </div>
       ) : null}
       <div className="mb-6 flex flex-wrap gap-2">
@@ -110,7 +130,7 @@ export default async function MessagesPage({
           );
         })}
       </div>
-      <RealtimeChat bookingId={bookingId} currentUserId={user.id} initialMessages={initialMessages ?? []} />
+      <RealtimeChat bookingId={bookingId} currentUserId={user.id} initialMessages={initialMessages ?? []} peerLabel={peerLabel} />
     </DashboardShell>
   );
 }

@@ -9,13 +9,13 @@ export type BookingActionStatus = "accepted" | "rejected" | "cancelled" | "compl
 export async function updateBookingStatus(bookingId: string, nextStatus: BookingActionStatus) {
   const supabase = await createSupabaseServerClient();
   if (!supabase) {
-    return { error: "Supabase non configure" };
+    return { error: "Supabase non configuré" };
   }
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return { error: "Non authentifie" };
+    return { error: "Non authentifié" };
   }
 
   const { data: booking, error: loadErr } = await supabase
@@ -25,7 +25,7 @@ export async function updateBookingStatus(bookingId: string, nextStatus: Booking
     .single();
 
   if (loadErr || !booking) {
-    return { error: loadErr?.message ?? "Reservation introuvable" };
+    return { error: loadErr?.message ?? "Réservation introuvable" };
   }
 
   const tripRow = booking.trips as { traveler_id: string } | { traveler_id: string }[] | null;
@@ -43,25 +43,25 @@ export async function updateBookingStatus(bookingId: string, nextStatus: Booking
       return { error: "Seul le voyageur peut accepter ou refuser." };
     }
     if (cur !== "pending") {
-      return { error: "Cette reservation n'est plus modifiable." };
+      return { error: "Cette réservation n'est plus modifiable." };
     }
-  }
+  } 
 
   if (nextStatus === "cancelled") {
     if (!isSender) {
-      return { error: "Seul l'expediteur peut annuler une demande en attente." };
+      return { error: "Seul l'expéditeur peut annuler une demande en attente." };
     }
     if (cur !== "pending") {
-      return { error: "Annulation impossible a ce stade." };
+      return { error: "Annulation impossible à ce stade." };
     }
   }
 
   if (nextStatus === "completed") {
     if (!isTraveler && !isSender) {
-      return { error: "Acces refuse." };
+      return { error: "Accès refusé." };
     }
     if (cur !== "accepted") {
-      return { error: "La reservation doit etre acceptee avant cloture." };
+      return { error: "La réservation doit être acceptée avant clôture." };
     }
   }
 
@@ -80,7 +80,7 @@ export async function updateBookingStatus(bookingId: string, nextStatus: Booking
 export async function submitReviewAction(formData: FormData) {
   const supabase = await createSupabaseServerClient();
   if (!supabase) {
-    return { error: "Supabase non configure" };
+    return { error: "Supabase non configuré" };
   }
   const {
     data: { user },
@@ -95,7 +95,7 @@ export async function submitReviewAction(formData: FormData) {
   const comment = String(formData.get("comment") ?? "");
 
   if (!bookingId || !reviewedUserId || rating < 1 || rating > 5) {
-    return { error: "Donnees d'avis invalides." };
+    return { error: "Données d'avis invalides." };
   }
 
   const { data: booking, error: loadErr } = await supabase
@@ -105,7 +105,7 @@ export async function submitReviewAction(formData: FormData) {
     .single();
 
   if (loadErr || !booking || booking.status !== "completed") {
-    return { error: "Avis possible uniquement apres une reservation terminee." };
+    return { error: "Avis possible uniquement après une réservation terminée." };
   }
 
   const tripRow = booking.trips as { traveler_id: string } | { traveler_id: string }[] | null;
@@ -116,13 +116,13 @@ export async function submitReviewAction(formData: FormData) {
   const isTraveler = travelerId === user.id;
   const isSender = booking.sender_id === user.id;
   if (!isTraveler && !isSender) {
-    return { error: "Acces refuse." };
+    return { error: "Accès refusé." };
   }
   if (reviewedUserId !== travelerId && reviewedUserId !== booking.sender_id) {
     return { error: "Destinataire de l'avis invalide." };
   }
   if (reviewedUserId === user.id) {
-    return { error: "Vous ne pouvez pas vous noter vous-meme." };
+    return { error: "Vous ne pouvez pas vous noter vous-même." };
   }
 
   const { error } = await supabase.from("reviews").insert({

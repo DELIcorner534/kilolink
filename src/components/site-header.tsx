@@ -46,7 +46,7 @@ export async function SiteHeader() {
               Connexion
             </Link>
             <Link
-              href="/dashboard"
+              href="/auth/sign-in"
               className="rounded-full bg-[#0b1f4d] px-5 py-2.5 text-sm font-semibold !text-white shadow-lg shadow-blue-900/20 transition hover:brightness-110"
             >
               Espace membre
@@ -93,7 +93,7 @@ export async function SiteHeader() {
             </Link>
           ) : null}
           <Link
-            href="/dashboard"
+            href={user ? "/dashboard" : "/auth/sign-in"}
             className="rounded-full bg-[#0b1f4d] px-5 py-2.5 text-sm font-semibold !text-white shadow-lg shadow-blue-900/20 transition hover:brightness-110"
           >
             Espace membre
@@ -101,7 +101,7 @@ export async function SiteHeader() {
           {user ? (
             <form action={signOutAction}>
               <button className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">
-                Deconnexion
+                Déconnexion
               </button>
             </form>
           ) : null}

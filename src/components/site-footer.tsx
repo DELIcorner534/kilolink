@@ -7,9 +7,8 @@ export function SiteFooter() {
         <div>
           <p className="font-display text-xl font-semibold text-[#0b1f4d]">KiloLink</p>
           <p className="mt-2 max-w-xs">
-            Plateforme de mise en relation entre voyageurs et expediteurs, avec un parcours simple et securise.
+            Plateforme de mise en relation entre voyageurs et expéditeurs, avec un parcours simple et sécurisé.
           </p>
-          <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Trusted by diaspora teams</p>
         </div>
         <div>
           <p className="font-semibold text-slate-900">Plateforme</p>
@@ -23,18 +22,18 @@ export function SiteFooter() {
           </ul>
         </div>
         <div>
-          <p className="font-semibold text-slate-900">Legal</p>
+          <p className="font-semibold text-slate-900">Juridique</p>
           <ul className="mt-2 space-y-2">
             <li>
-              <Link href="/terms">Conditions generales</Link>
+              <Link href="/terms">Conditions générales</Link>
             </li>
             <li>
-              <Link href="/privacy">Politique confidentialite</Link>
+              <Link href="/privacy">Politique de confidentialité</Link>
             </li>
           </ul>
         </div>
         <div>
-          <p className="font-semibold text-slate-900">Support</p>
+          <p className="font-semibold text-slate-900">Assistance</p>
           <ul className="mt-2 space-y-2">
             <li>
               <Link href="/faq">FAQ</Link>
@@ -47,7 +46,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-slate-200 py-4">
         <p className="mx-auto max-w-7xl px-4 text-xs text-slate-500">
-          © {new Date().getFullYear()} KiloLink. Tous droits reserves. Plateforme inspiree des meilleurs standards UX du transport collaboratif.
+          © {new Date().getFullYear()} KiloLink. Tous droits réservés. Plateforme inspirée des meilleurs standards UX du transport collaboratif.
         </p>
       </div>
     </footer>

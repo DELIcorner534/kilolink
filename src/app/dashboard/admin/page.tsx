@@ -28,8 +28,8 @@ export default async function AdminPage() {
   let adminStats: { label: string; value: string }[] = [
     { label: "Utilisateurs (profils)", value: "—" },
     { label: "Trajets", value: "—" },
-    { label: "Reservations", value: "—" },
-    { label: "Paiements payes (count)", value: "—" },
+    { label: "Réservations", value: "—" },
+    { label: "Paiements payés (nombre)", value: "—" },
     { label: "Litiges ouverts", value: "—" },
   ];
 
@@ -45,18 +45,18 @@ export default async function AdminPage() {
     adminStats = [
       { label: "Utilisateurs (profils)", value: String(profiles.count ?? 0) },
       { label: "Trajets", value: String(trips.count ?? 0) },
-      { label: "Reservations", value: String(bookings.count ?? 0) },
-      { label: "Paiements payes", value: String(paidPayments.count ?? 0) },
+      { label: "Réservations", value: String(bookings.count ?? 0) },
+      { label: "Paiements payés", value: String(paidPayments.count ?? 0) },
       { label: "Litiges ouverts", value: String(openDisputes.count ?? 0) },
     ];
   }
 
   return (
-    <DashboardShell title="Admin panel">
+    <DashboardShell title="Administration" showAdminLink>
       {!adminClient ? (
         <p className="mb-4 text-sm text-amber-800">
           Ajoutez <code className="rounded bg-slate-100 px-1">SUPABASE_SERVICE_ROLE_KEY</code> pour afficher les statistiques
-          temps reel.
+          temps réel.
         </p>
       ) : null}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

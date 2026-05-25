@@ -1,6 +1,7 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { EnvWarning } from "@/components/env-warning";
 import { FormSubmitButton } from "@/components/form-submit-button";
+import { isProfileAdmin } from "@/lib/profile-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -37,6 +38,14 @@ async function createBookingAction(formData: FormData) {
     redirect(`/booking/new?error=${encodeURIComponent(error.message)}`);
   }
 
+  // Si l'utilisateur a une récompense de parrainage disponible, on l'applique
+  // automatiquement à cette réservation (la RPC est idempotente côté DB).
+  try {
+    await supabase.rpc("apply_reward_to_booking", { p_booking_id: data.id });
+  } catch {
+    // Non-bloquant : on garde la réservation au tarif standard si la RPC échoue.
+  }
+
   redirect(`/booking/${data.id}?new=1`);
 }
 
@@ -47,17 +56,26 @@ export default async function NewBookingPage({
 }) {
   const params = await searchParams;
   const supabase = await createSupabaseServerClient();
+  let showAdminLink = false;
+  if (supabase) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      showAdminLink = await isProfileAdmin(supabase, user.id);
+    }
+  }
 
   return (
-    <DashboardShell title="Reserver un espace bagage">
-      {!supabase ? <EnvWarning title="Supabase non configure" /> : null}
+    <DashboardShell title="Réserver un espace bagage" showAdminLink={showAdminLink}>
+      {!supabase ? <EnvWarning title="Supabase non configuré" /> : null}
       {supabase ? (
         <form action={createBookingAction} className="space-y-4">
           {params.tripId ? (
             <>
               <input type="hidden" name="tripId" value={params.tripId} />
               <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-                Trajet selectionne automatiquement. Vous pouvez confirmer votre demande ci-dessous.
+                Trajet sélectionné automatiquement. Vous pouvez confirmer votre demande ci-dessous.
               </div>
             </>
           ) : (
@@ -75,7 +93,7 @@ export default async function NewBookingPage({
               type="number"
               min={1}
               className="w-full rounded-xl border border-slate-200 p-3"
-              placeholder="Kilos demandes"
+              placeholder="Kilos demandés"
               required
             />
             <input
@@ -83,7 +101,7 @@ export default async function NewBookingPage({
               type="number"
               min={0}
               className="w-full rounded-xl border border-slate-200 p-3"
-              placeholder="Valeur du colis (EUR)"
+              placeholder="Valeur du colis (€)"
             />
           </div>
           <textarea
@@ -98,7 +116,7 @@ export default async function NewBookingPage({
             placeholder="Lien photo colis (optionnel)"
           />
           <FormSubmitButton
-            idleLabel="Confirmer reservation"
+            idleLabel="Confirmer la réservation"
             loadingLabel="Confirmation..."
             className="rounded-xl bg-[#0b1f4d] px-5 py-3 font-semibold !text-white"
           />

@@ -26,6 +26,7 @@ Puis ouvrir [http://localhost:3000](http://localhost:3000).
 - `src/lib`: types, data mocks, clients Supabase/Stripe
 - `docs/database/schema.sql`: schema SQL de base
 - `docs/database/migration_phase_complete.sql`: migration SQL complementaire
+- `docs/database/migration_faqs.sql`: table FAQ admin + policies
 - `docs/GO_LIVE_RUNBOOK.md`: checklist finale de mise en production
 
 ## Configuration externe obligatoire
@@ -40,13 +41,14 @@ Puis ouvrir [http://localhost:3000](http://localhost:3000).
 ## Verification rapide avant prod
 
 1. Executer `docs/database/migration_phase_complete.sql` dans Supabase SQL editor.
-2. Activer Realtime sur la table `messages`.
-3. Configurer le webhook Stripe vers `/api/stripe/webhook`.
-4. Lancer:
+2. Executer `docs/database/migration_faqs.sql` dans Supabase SQL editor.
+3. Activer Realtime sur la table `messages`.
+4. Configurer le webhook Stripe vers `/api/stripe/webhook`.
+5. Lancer:
 
 ```bash
 npm run build
 ```
 
-5. Valider le parcours metier complet:
+6. Valider le parcours metier complet:
    - publier trajet -> reserver -> accepter -> payer -> marquer terminee -> laisser avis.

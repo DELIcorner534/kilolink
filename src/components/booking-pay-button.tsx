@@ -26,7 +26,7 @@ export function BookingPayButton({ bookingId }: BookingPayButtonProps) {
       }
       setError(data.error ?? "Paiement indisponible");
     } catch {
-      setError("Erreur reseau");
+      setError("Erreur réseau");
     } finally {
       setLoading(false);
     }
@@ -40,7 +40,7 @@ export function BookingPayButton({ bookingId }: BookingPayButtonProps) {
         disabled={loading}
         className="rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white disabled:opacity-50"
       >
-        {loading ? "Redirection..." : "Payer avec Stripe"}
+        {loading ? "Redirection…" : "Payer avec Stripe"}
       </button>
       {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
     </div>

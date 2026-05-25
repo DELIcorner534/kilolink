@@ -3,6 +3,7 @@ import { EnvWarning } from "@/components/env-warning";
 import { BookingPayButton } from "@/components/booking-pay-button";
 import { RealtimeChat } from "@/components/realtime-chat";
 import { bookingStatusFormAction, reviewFormAction } from "@/app/booking/[id]/actions";
+import { isProfileAdmin } from "@/lib/profile-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -38,7 +39,7 @@ export default async function BookingDetailPage({
   const supabase = await createSupabaseServerClient();
   if (!supabase) {
     return (
-      <DashboardShell title="Reservation">
+      <DashboardShell title="Réservation" showAdminLink={false}>
         <EnvWarning />
       </DashboardShell>
     );
@@ -51,6 +52,8 @@ export default async function BookingDetailPage({
     redirect("/auth/sign-in");
   }
 
+  const showAdminLink = await isProfileAdmin(supabase, user.id);
+
   const { data: booking, error } = await supabase
     .from("bookings")
     .select(
@@ -61,8 +64,8 @@ export default async function BookingDetailPage({
 
   if (error || !booking) {
     return (
-      <DashboardShell title="Reservation">
-        <p className="text-slate-600">Reservation introuvable.</p>
+      <DashboardShell title="Réservation" showAdminLink={showAdminLink}>
+        <p className="text-slate-600">Réservation introuvable.</p>
         <Link href="/dashboard" className="mt-4 inline-block font-semibold text-[#0b1f4d]">
           Retour au tableau de bord
         </Link>
@@ -73,7 +76,7 @@ export default async function BookingDetailPage({
   const trip = tripFromBooking(booking as { trips: TripEmbed | TripEmbed[] | null });
   if (!trip) {
     return (
-      <DashboardShell title="Reservation">
+      <DashboardShell title="Réservation" showAdminLink={showAdminLink}>
         <p className="text-slate-600">Trajet introuvable.</p>
       </DashboardShell>
     );
@@ -83,8 +86,8 @@ export default async function BookingDetailPage({
   const isSender = booking.sender_id === user.id;
   if (!isTraveler && !isSender) {
     return (
-      <DashboardShell title="Reservation">
-        <p className="text-slate-600">Acces refuse.</p>
+      <DashboardShell title="Réservation" showAdminLink={showAdminLink}>
+        <p className="text-slate-600">Accès refusé.</p>
         <Link href="/dashboard" className="mt-4 inline-block font-semibold text-[#0b1f4d]">
           Retour
         </Link>
@@ -108,27 +111,27 @@ export default async function BookingDetailPage({
 
   const nameByUser = new Map((profiles ?? []).map((p) => [p.user_id as string, p.full_name as string]));
   const travelerName = nameByUser.get(trip.traveler_id) ?? "Voyageur";
-  const senderName = nameByUser.get(booking.sender_id) ?? "Expediteur";
+  const senderName = nameByUser.get(booking.sender_id) ?? "Expéditeur";
   const peerLabel = isTraveler ? senderName : travelerName;
   const totalEur = Number(booking.kilos_requested) * Number(trip.price_per_kg);
   const hasPaid = (payments ?? []).some((p) => p.status === "paid");
   const canPay = isSender && booking.status === "accepted" && !hasPaid;
 
   return (
-    <DashboardShell title="Detail reservation">
+    <DashboardShell title="Détail de la réservation" showAdminLink={showAdminLink}>
       {q.new === "1" ? (
         <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-          Reservation creee. Le voyageur peut accepter ou refuser. Vous pouvez echanger ci-dessous.
+          Réservation créée. Le voyageur peut accepter ou refuser. Vous pouvez échanger ci-dessous.
         </div>
       ) : null}
       {q.payment === "success" ? (
         <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-          Paiement confirme. Merci !
+          Paiement confirmé. Merci !
         </div>
       ) : null}
       {q.payment === "cancel" ? (
         <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          Paiement annule. Vous pouvez reessayer quand vous voulez.
+          Paiement annulé. Vous pouvez réessayer quand vous voulez.
         </div>
       ) : null}
       {q.error ? (
@@ -141,17 +144,17 @@ export default async function BookingDetailPage({
           <p className="mt-1 font-semibold text-slate-900">
             {trip.origin} → {trip.destination}
           </p>
-          <p className="mt-1 text-sm text-slate-600">Depart: {trip.departure_date}</p>
+          <p className="mt-1 text-sm text-slate-600">Départ : {trip.departure_date}</p>
           <p className="text-sm text-slate-600">Statut trajet: {trip.status}</p>
         </div>
         <div>
-          <p className="text-xs font-semibold uppercase text-slate-500">Reservation</p>
+          <p className="text-xs font-semibold uppercase text-slate-500">Réservation</p>
           <p className="mt-1 text-sm text-slate-700">
             Statut: <span className="font-semibold">{booking.status}</span>
           </p>
           <p className="text-sm text-slate-700">Kilos: {booking.kilos_requested}</p>
           <p className="text-sm text-slate-700">
-            Prix estime: {totalEur.toFixed(2)} EUR ({trip.price_per_kg} EUR/kg)
+            Prix estimé : {totalEur.toFixed(2)} € ({trip.price_per_kg} €/kg)
           </p>
         </div>
       </section>
@@ -189,7 +192,7 @@ export default async function BookingDetailPage({
             <input type="hidden" name="bookingId" value={id} />
             <input type="hidden" name="nextStatus" value="completed" />
             <button type="submit" className="rounded-xl bg-[#0b1f4d] px-4 py-2 text-sm font-semibold text-white">
-              Marquer comme terminee
+              Marquer comme terminée
             </button>
           </form>
         ) : null}
@@ -198,18 +201,18 @@ export default async function BookingDetailPage({
       {canPay ? (
         <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
           <p className="font-semibold text-slate-900">Paiement</p>
-          <p className="mt-1 text-sm text-slate-600">Montant du: {totalEur.toFixed(2)} EUR (commission plateforme ~10% enregistree).</p>
+          <p className="mt-1 text-sm text-slate-600">Montant dû : {totalEur.toFixed(2)} € (commission plateforme ~10 % enregistrée).</p>
           <BookingPayButton bookingId={id} />
         </section>
       ) : null}
 
       {(payments ?? []).length > 0 ? (
         <section className="mt-6">
-          <p className="font-semibold text-slate-900">Historique paiements</p>
+          <p className="font-semibold text-slate-900">Historique des paiements</p>
           <ul className="mt-2 space-y-2 text-sm text-slate-700">
             {(payments ?? []).map((p) => (
               <li key={p.id} className="rounded-lg border border-slate-200 px-3 py-2">
-                {Number(p.amount).toFixed(2)} EUR — {p.status}
+                {Number(p.amount).toFixed(2)} € — {p.status}
               </li>
             ))}
           </ul>
@@ -219,7 +222,7 @@ export default async function BookingDetailPage({
       {booking.status === "completed" && !myReview ? (
         <section className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
           <p className="font-semibold text-slate-900">Laisser un avis</p>
-          <p className="mt-1 text-sm text-slate-600">Une seule evaluation par reservation.</p>
+          <p className="mt-1 text-sm text-slate-600">Une seule évaluation par réservation.</p>
           <form action={reviewFormAction} className="mt-4 space-y-3">
             <input type="hidden" name="bookingId" value={id} />
             <input type="hidden" name="reviewedUserId" value={isSender ? trip.traveler_id : booking.sender_id} />
@@ -245,7 +248,7 @@ export default async function BookingDetailPage({
       ) : null}
 
       {myReview ? (
-        <p className="mt-6 text-sm text-emerald-800">Votre avis ({myReview.rating}/5) a ete enregistre.</p>
+        <p className="mt-6 text-sm text-emerald-800">Votre avis ({myReview.rating}/5) a été enregistré.</p>
       ) : null}
 
       <section className="mt-8">

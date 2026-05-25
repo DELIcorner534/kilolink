@@ -8,7 +8,7 @@ export function EnvWarning({ title = "Configuration requise" }: EnvWarningProps)
       <p className="font-semibold">{title}</p>
       <p className="mt-1 text-sm">
         Configurez `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY` dans `.env.local`,
-        puis redemarrez `npm run dev`.
+        puis redémarrez `npm run dev`.
       </p>
     </div>
   );

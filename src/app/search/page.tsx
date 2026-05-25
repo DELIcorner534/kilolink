@@ -1,6 +1,6 @@
 import { TripCard } from "@/components/trip-card";
 import { EnvWarning } from "@/components/env-warning";
-import { supportedCities } from "@/lib/data";
+import { supportedCountries } from "@/lib/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchActiveTripsWithProfiles } from "@/lib/trips";
 import Link from "next/link";
@@ -17,9 +17,9 @@ export default async function SearchPage({
       <main className="mx-auto max-w-7xl px-4 py-10 md:py-14">
         <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
           <h1 className="font-display text-3xl font-semibold tracking-tight text-slate-900">Recherche voyageurs</h1>
-          <p className="mt-2 text-slate-600">Filtrez par ville de depart, ville de destination, date, kilos et prix.</p>
+          <p className="mt-2 text-slate-600">Filtrez par pays de départ, pays de destination et date.</p>
           <div className="mt-6">
-            <EnvWarning title="Supabase non configure" />
+            <EnvWarning title="Supabase non configuré" />
           </div>
         </section>
       </main>
@@ -37,14 +37,14 @@ export default async function SearchPage({
     <main className="mx-auto max-w-7xl px-4 py-10 md:py-14">
       <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
         <h1 className="font-display text-3xl font-semibold tracking-tight text-slate-900">Recherche voyageurs</h1>
-        <p className="mt-2 text-slate-600">Filtrez par ville de depart, ville de destination, date, kilos et prix.</p>
+        <p className="mt-2 text-slate-600">Filtrez par pays de départ, pays de destination et date.</p>
       <div className="mt-4 flex flex-wrap gap-2">
-        {supportedCities.map((city) => (
+        {supportedCountries.map((country) => (
           <span
-            key={city}
+            key={country.name}
             className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700"
           >
-            {city}
+            {country.name}
           </span>
         ))}
       </div>
@@ -54,10 +54,10 @@ export default async function SearchPage({
           className="rounded-xl border border-slate-200 bg-slate-50 p-3"
           defaultValue={params.origin ?? ""}
         >
-          <option value="">Ville de depart (toutes)</option>
-          {supportedCities.map((city) => (
-            <option key={city} value={city}>
-              {city}
+          <option value="">Pays de départ (tous)</option>
+          {supportedCountries.map((country) => (
+            <option key={country.name} value={country.name}>
+              {country.name}
             </option>
           ))}
         </select>
@@ -66,10 +66,10 @@ export default async function SearchPage({
           className="rounded-xl border border-slate-200 bg-slate-50 p-3"
           defaultValue={params.destination ?? ""}
         >
-          <option value="">Ville d&apos;arrivee (toutes)</option>
-          {supportedCities.map((city) => (
-            <option key={city} value={city}>
-              {city}
+          <option value="">Pays d&apos;arrivée (tous)</option>
+          {supportedCountries.map((country) => (
+            <option key={country.name} value={country.name}>
+              {country.name}
             </option>
           ))}
         </select>
@@ -79,7 +79,7 @@ export default async function SearchPage({
           href="/search"
           className="rounded-xl border border-slate-200 bg-white p-3 text-center font-semibold text-slate-700 transition hover:bg-slate-50"
         >
-          Reinitialiser
+          Réinitialiser
         </Link>
       </form>
       </section>
@@ -89,14 +89,14 @@ export default async function SearchPage({
         ))}
         {tripCards.length === 0 ? (
           <article className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-600 md:col-span-2 lg:col-span-3">
-            <p className="font-semibold text-slate-900">Aucun trajet trouve pour ce filtre.</p>
+            <p className="font-semibold text-slate-900">Aucun trajet trouvé pour ce filtre.</p>
             <p className="mt-1">Essayez une autre date ou publiez votre propre trajet.</p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Link href="/publish-trip" className="rounded-xl bg-[#0b1f4d] px-4 py-2 text-sm font-semibold !text-white">
                 Publier un trajet
               </Link>
               <Link href="/search" className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700">
-                Reinitialiser la recherche
+                Réinitialiser la recherche
               </Link>
             </div>
           </article>

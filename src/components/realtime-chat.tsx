@@ -77,7 +77,7 @@ export function RealtimeChat({ bookingId, currentUserId, initialMessages, peerLa
       <div className="mt-5 flex gap-2">
         <input
           className="flex-1 rounded-xl border border-slate-200 p-3"
-          placeholder="Ecrire un message"
+          placeholder="Écrire un message"
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
         />

@@ -22,7 +22,7 @@ export default function UpdatePasswordPage() {
     const confirmPassword = String(formData.get("confirmPassword") ?? "");
 
     if (password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caracteres.");
+      setError("Le mot de passe doit contenir au moins 8 caractères.");
       return;
     }
     if (password !== confirmPassword) {
@@ -45,7 +45,7 @@ export default function UpdatePasswordPage() {
       return;
     }
 
-    setSuccess("Mot de passe mis a jour avec succes. Redirection...");
+    setSuccess("Mot de passe mis à jour avec succès. Redirection…");
     setTimeout(() => router.push("/auth/sign-in"), 1200);
   };
 
@@ -54,7 +54,7 @@ export default function UpdatePasswordPage() {
       <section className="rounded-3xl border border-slate-200/80 bg-white p-7 shadow-[0_10px_35px_rgba(15,23,42,0.08)]">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Espace membre</p>
         <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-slate-900">Nouveau mot de passe</h1>
-        <p className="mt-2 text-sm text-slate-500">Saisissez votre nouveau mot de passe pour finaliser la reinitialisation.</p>
+        <p className="mt-2 text-sm text-slate-500">Saisissez votre nouveau mot de passe pour finaliser la réinitialisation.</p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <PasswordField
@@ -77,7 +77,7 @@ export default function UpdatePasswordPage() {
             disabled={loading}
             className="w-full rounded-xl bg-gradient-to-r from-[#0b1f4d] to-[#1d3f8f] px-4 py-3 font-semibold !text-white shadow-lg shadow-blue-900/20 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {loading ? "Mise a jour..." : "Mettre a jour le mot de passe"}
+            {loading ? "Mise à jour…" : "Mettre à jour le mot de passe"}
           </button>
 
           {error ? <p className="text-sm text-red-600">{error}</p> : null}

@@ -15,7 +15,9 @@ export function TripCard({ trip }: TripCardProps) {
           </div>
           <div>
             <p className="font-semibold text-slate-900">{trip.travelerName}</p>
-            <p className="text-sm text-slate-500">Note {trip.rating}/5</p>
+            <p className="text-sm text-slate-500">
+              {trip.rating != null ? `Note ${trip.rating}/5` : "Pas encore d'avis"}
+            </p>
           </div>
         </div>
         <p className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
@@ -25,15 +27,15 @@ export function TripCard({ trip }: TripCardProps) {
       <p className="text-sm font-medium text-slate-700">
         {trip.origin} → {trip.destination}
       </p>
-      <p className="mt-1 text-sm text-slate-500">Depart: {trip.departureDate}</p>
-      <p className="mt-1 text-sm text-slate-500">Compagnie: {trip.airline}</p>
+      <p className="mt-1 text-sm text-slate-500">Départ : {trip.departureDate}</p>
+      <p className="mt-1 text-sm text-slate-500">Compagnie : {trip.airline}</p>
       <div className="mt-4 flex items-center justify-between">
-        <p className="text-xl font-bold tracking-tight text-[#0b1f4d]">{trip.pricePerKg} EUR/kg</p>
+        <p className="text-xl font-bold tracking-tight text-[#0b1f4d]">{trip.pricePerKg} €/kg</p>
         <Link
           href={`/booking/new?tripId=${encodeURIComponent(trip.id)}`}
           className="inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold !text-white transition group-hover:bg-[#0b1f4d]"
         >
-          Reserver
+          Réserver
         </Link>
       </div>
     </article>

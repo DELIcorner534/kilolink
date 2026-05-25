@@ -17,6 +17,7 @@ Suivre cette liste dans l'ordre. Quand un point est termine, cocher et passer au
 
 - [ ] Executer `docs/database/schema.sql`.
 - [ ] Executer `docs/database/migration_phase_complete.sql`.
+- [ ] Executer `docs/database/migration_faqs.sql`.
 - [ ] Verifier RLS/policies (attendu: 22 policies sur les 9 tables principales).
 - [ ] Activer Realtime sur `public.messages`.
 

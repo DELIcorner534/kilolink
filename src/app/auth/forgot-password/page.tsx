@@ -41,10 +41,10 @@ export default async function ForgotPasswordPage({
 
   return (
     <main className="mx-auto max-w-md px-4 py-10">
-      <h1 className="font-display text-3xl font-semibold text-slate-900">Mot de passe oublie</h1>
-      <p className="mt-2 text-sm text-slate-600">Entrez votre email pour recevoir un lien de reinitialisation.</p>
+      <h1 className="font-display text-3xl font-semibold text-slate-900">Mot de passe oublié</h1>
+      <p className="mt-2 text-sm text-slate-600">Entrez votre e-mail pour recevoir un lien de réinitialisation.</p>
 
-      {!supabase ? <div className="mt-6"><EnvWarning title="Supabase non configure" /></div> : null}
+      {!supabase ? <div className="mt-6"><EnvWarning title="Supabase non configuré" /></div> : null}
       {supabase ? (
         <form action={forgotPasswordAction} className="mt-6 space-y-4 rounded-2xl border border-slate-200 bg-white p-6">
           <input
@@ -55,13 +55,13 @@ export default async function ForgotPasswordPage({
             placeholder="Email"
           />
           <FormSubmitButton
-            idleLabel="Envoyer lien de reinitialisation"
+            idleLabel="Envoyer le lien de réinitialisation"
             loadingLabel="Envoi..."
             className="w-full rounded-xl bg-[#0b1f4d] px-4 py-3 font-semibold !text-white"
           />
           {params.error ? <p className="text-sm text-red-600">{params.error}</p> : null}
           {params.success ? (
-            <p className="text-sm text-emerald-700">Email envoye. Verifiez votre boite de reception.</p>
+            <p className="text-sm text-emerald-700">E-mail envoyé. Vérifiez votre boîte de réception.</p>
           ) : null}
         </form>
       ) : null}

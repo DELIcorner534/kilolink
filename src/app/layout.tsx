@@ -16,9 +16,9 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "KiloLink - Transport colis diaspora premium",
+  title: "KiloLink — Covoiturage de colis Belgique–Afrique",
   description:
-    "Plateforme premium de mise en relation entre voyageurs et expéditeurs de colis entre Belgique et Afrique.",
+    "Plateforme de mise en relation entre voyageurs et expéditeurs de colis entre la Belgique et l’Afrique.",
 };
 
 export default function RootLayout({

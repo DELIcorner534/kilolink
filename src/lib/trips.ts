@@ -48,11 +48,18 @@ export async function fetchActiveTripsWithProfiles(
 
   const byUser = new Map((profiles ?? []).map((p) => [p.user_id as string, p]));
 
+  const { data: reviewTargets } = await supabase
+    .from("reviews")
+    .select("reviewed_user_id")
+    .in("reviewed_user_id", travelerIds);
+  const travelersWithReviews = new Set((reviewTargets ?? []).map((r) => r.reviewed_user_id as string));
+
   return rows.map((trip) => {
     const p = byUser.get(trip.traveler_id);
     const name = p?.full_name ?? "Voyageur";
     const initial = name.trim().charAt(0).toUpperCase() || "V";
-    const rating = p?.rating != null ? Number(p.rating) : 5;
+    const hasReviews = travelersWithReviews.has(trip.traveler_id);
+    const rating = hasReviews && p?.rating != null ? Number(p.rating) : null;
     return {
       id: trip.id,
       travelerName: name,
@@ -63,7 +70,7 @@ export async function fetchActiveTripsWithProfiles(
       departureDate: trip.departure_date,
       kilosAvailable: trip.kilos_available,
       pricePerKg: Number(trip.price_per_kg),
-      airline: trip.airline ?? "N/A",
+      airline: trip.airline?.trim() || "—",
     };
   });
 }
